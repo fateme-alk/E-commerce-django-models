@@ -11,6 +11,9 @@ class Category(models.Model):
         blank=True,
     )
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
     def __str__(self):
         return self.name
 
@@ -38,13 +41,36 @@ class Seller(models.Model):
         return self.user.username
 
 
+class Transaction(models.Model):
+    PAYMENT_CHOICES = [
+        ("Digital wallets", "Digital wallets"),
+        ("Cash", "Cash"),
+        ("Gift card", "Gift card"),
+        ("Credit card", "Credit card"),
+    ]
+
+    total_price = models.PositiveBigIntegerField()
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    treansaction_num = models.PositiveBigIntegerField()
+
+
+class Order(models.Model):
+    products = models.ManyToManyField(Product)
+    order_num = models.PositiveBigIntegerField()
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.order_num
+
+
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=20)
     address = models.TextField()
-    ordered_products = models.ManyToManyField(Product)
+    orders = models.ManyToManyField(Order)
 
     def __str__(self):
         return self.user.username
